@@ -51,8 +51,9 @@ public class SearchResultsActivity extends AppCompatActivity{
     private ArrayList<User> foundUsers;
     private ArrayAdapter<User> listAdapter;
     private int foundKeysIndex;
+    private StringBuilder stringHolder;
 
-    ArrayList<String> tutorInfo;
+    ArrayList<String> tutorKeys;
     private DatabaseReference fireBaseRef;
 
     @Override
@@ -115,15 +116,20 @@ public class SearchResultsActivity extends AppCompatActivity{
     }
 
     private void fillList() {
-        tutorInfo = new ArrayList<String>();
+        tutorKeys = new ArrayList<String>();
+        stringHolder = new StringBuilder("");
         fireBaseRef = FirebaseDatabase.getInstance().getReference();
-        fireBaseRef.child("activetutors").addListenerForSingleValueEvent(new ValueEventListener() {
+        fireBaseRef.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot tutors : dataSnapshot.getChildren()) {
-                    tutorInfo.add(tutors.child("g").getValue().toString());
+                    if(foundTutorKeys.contains(tutors.getKey().toString())) {
+                        stringHolder.append(tutors.child("firstName").getValue().toString()).append(" ").append(tutors.child("lastName").getValue().toString());
+                        tutorKeys.add(stringHolder.toString());
+                        stringHolder.delete(0,stringHolder.length());
+                    }
                 }
-                ArrayAdapter adapter = new ArrayAdapter(SearchResultsActivity.this, android.R.layout.simple_list_item_1, tutorInfo);
+                ArrayAdapter adapter = new ArrayAdapter(SearchResultsActivity.this, android.R.layout.simple_list_item_1, tutorKeys);
                 tutorList.setAdapter(adapter);
             }
             @Override
